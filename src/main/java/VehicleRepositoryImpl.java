@@ -8,6 +8,11 @@ import java.util.Scanner;
 public class VehicleRepositoryImpl implements IVehicleRepository{
     private final List<Vehicle> vehicles;
 
+    public boolean validID(String id){
+        for(Vehicle vehicle: vehicles) if(vehicle.getInsideID().equals(id)) return true;
+        return false;
+    }
+
     public VehicleRepositoryImpl() {
         this.vehicles = new ArrayList<>();
         load();

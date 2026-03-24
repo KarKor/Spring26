@@ -7,6 +7,14 @@ public class User {
     private String rentedVehicleID;
     private boolean online;
 
+    public User(String login, String password, Role role){
+        this.login = login;
+        this.password=password;
+        this.role =role;
+        this.rentedVehicleID="";
+        online=false;
+    }
+
     public User(String login, String password, Role role, String rentedVehicleID){
         this.login = login;
         this.password=password;
@@ -43,8 +51,18 @@ public class User {
         return new User(login, password, role, rentedVehicleID);
     }
 
+    public boolean rented(){
+        return !rentedVehicleID.isEmpty();
+    }
+
     public String toCSV() {
         String vehicleStr = (rentedVehicleID != null) ? rentedVehicleID : "";
         return login + ";" + password + ";" + role + ";" + vehicleStr;
+    }
+
+    @Override
+    public String toString(){
+        return "role: " + role
+                + " username: " + login;
     }
 }
