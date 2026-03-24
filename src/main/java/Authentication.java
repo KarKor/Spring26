@@ -1,3 +1,6 @@
+import java.util.ArrayList;
+import java.util.List;
+
 public class Authentication {
 
     private final IUserRepository userRepository;
@@ -15,6 +18,17 @@ public class Authentication {
             }
         }
         return null;
+    }
+
+    public boolean register(String login, String password){
+        List<String> logins=userRepository.logins();
+        for(String log : logins){
+            System.out.println("This login is already uin use");
+            if(login.equals(log)) return false;
+        }
+        userRepository.add(new User(login,Authentication.hashPassword(password),Role.USER));
+        System.out.println("Registered successfully");
+        return true;
     }
 
     public static String hashPassword(String password) {

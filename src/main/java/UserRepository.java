@@ -31,6 +31,14 @@ public class UserRepository implements IUserRepository{
     }
 
     @Override
+    public List<String> logins(){
+        ArrayList<String> copied = new ArrayList<>();
+        for(User user:users) copied.add(user.getLogin());
+
+        return copied;
+    }
+
+    @Override
     public boolean update(User user) {
         for(int i = 0; i < users.size(); i++) {
             if(users.get(i).getLogin().equals(user.getLogin())) {
@@ -55,24 +63,6 @@ public class UserRepository implements IUserRepository{
 
     }
 
-//    @Override
-//    public void load() {
-//        users.clear();
-//        try {
-//            File file = new File("users.csv");
-//            Scanner scannerF = new Scanner(file);
-//
-//            while (scannerF.hasNextLine()){
-//                String line = scannerF.nextLine();
-//                String[] parts = line.split(";");
-//                users.add(new User(parts[0], Hasher.hashPassword(parts[1]), Role.valueOf(parts[2])));
-//            }
-//            scannerF.close();
-//        }catch (FileNotFoundException e){
-//            System.out.println("File not found");
-//        }
-//    }
-
     @Override
     public void load() {
         users.clear();
@@ -96,5 +86,27 @@ public class UserRepository implements IUserRepository{
         } catch (Exception e){
             System.out.println("User or file does not exist.");
         }
+    }
+
+    @Override
+    public boolean add(User user){
+        if (getUser(user.getRentedVehicleID()) != null) {
+            return false;
+        }
+        users.add(user);
+        save();
+        return true;
+    }
+
+    @Override
+    public boolean remove(String login){
+        for(User user: users){
+            if(user.getLogin().equals(login)) {
+                users.remove(user);
+                save();
+                return true;
+            }
+        }
+        return false;
     }
 }
