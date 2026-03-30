@@ -1,4 +1,3 @@
-import java.util.ArrayList;
 import java.util.List;
 
 public class Authentication {
@@ -20,15 +19,17 @@ public class Authentication {
         return null;
     }
 
-    public boolean register(String login, String password){
+    public User register(String login, String password){
         List<String> logins=userRepository.logins();
         for(String log : logins){
-            System.out.println("This login is already uin use");
-            if(login.equals(log)) return false;
+            if(login.equals(log)) {
+                System.out.println("This login is already in use");
+                return null;
+            }
         }
         userRepository.add(new User(login,Authentication.hashPassword(password),Role.USER));
         System.out.println("Registered successfully");
-        return true;
+        return new User(login,Authentication.hashPassword(password),Role.USER);
     }
 
     public static String hashPassword(String password) {

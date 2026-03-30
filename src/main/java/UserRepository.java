@@ -50,20 +50,20 @@ public class UserRepository implements IUserRepository{
         return false;
     }
 
-    @Override
     public void save() {
         try{
             PrintWriter writer = new PrintWriter("users.csv");
             for(User user: users){
                 writer.println(user.toCSV());
             }
+            writer.close();
+            System.out.println("saved");
         }catch (FileNotFoundException e){
             System.out.println("File not found");
         }
 
     }
 
-    @Override
     public void load() {
         users.clear();
         try {
@@ -90,18 +90,24 @@ public class UserRepository implements IUserRepository{
 
     @Override
     public boolean add(User user){
-        if (getUser(user.getRentedVehicleID()) != null) {
-            return false;
-        }
         users.add(user);
         save();
         return true;
+    }
+
+    public boolean validLogin(String login){
+        for(User user: users) if(user.getLogin().equals(login)) return true;
+        return false;
     }
 
     @Override
     public boolean remove(String login){
         for(User user: users){
             if(user.getLogin().equals(login)) {
+                if(user.rented()){
+                    System.out.println("User currently has a rented vehicle");
+                    return false;
+                }
                 users.remove(user);
                 save();
                 return true;
