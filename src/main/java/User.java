@@ -52,7 +52,7 @@ public class User {
     }
 
     public boolean rented(){
-        return !rentedVehicleID.isEmpty();
+        return !(this.rentedVehicleID==null);
     }
 
     public String toCSV() {

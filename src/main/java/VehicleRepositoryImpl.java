@@ -31,6 +31,7 @@ public class VehicleRepositoryImpl implements IVehicleRepository{
     public boolean remove(String id){
         for(Vehicle vehicle: vehicles){
             if(Integer.parseInt(vehicle.getInsideID())==Integer.parseInt(id)) {
+                if(vehicle.isRented()) return false;
                 vehicles.remove(vehicle);
                 save();
                 return true;
@@ -89,7 +90,6 @@ public class VehicleRepositoryImpl implements IVehicleRepository{
         return null;
     }
 
-    @Override
     public void save() {
         try{
             PrintWriter writer = new PrintWriter("vehicles.csv");
@@ -104,7 +104,6 @@ public class VehicleRepositoryImpl implements IVehicleRepository{
 
     }
 
-    @Override
     public void load() {
         vehicles.clear();
 
