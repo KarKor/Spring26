@@ -1,4 +1,6 @@
-public class Car extends Vehicle{
+package com.umcsuser.current.models;
+
+public class Car extends Vehicle {
     public Car(String insideID, String brand, String model, int year, double price, boolean rented) {
         super(insideID, brand, model, year, price, rented);
     }

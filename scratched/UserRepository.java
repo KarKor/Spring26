@@ -1,3 +1,6 @@
+package com.umcsuser.current.repositories.impl;
+
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
@@ -6,7 +9,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Scanner;
 
-public class UserRepository implements IUserRepository{
+public class UserRepository implements IUserRepository {
     private final List<User> users;
 
     public UserRepository(){
@@ -84,7 +87,7 @@ public class UserRepository implements IUserRepository{
             }
             scannerF.close();
         } catch (Exception e){
-            System.out.println("User or file does not exist.");
+            System.out.println("com.umcsuser.current.models.User or file does not exist.");
         }
     }
 
@@ -105,7 +108,7 @@ public class UserRepository implements IUserRepository{
         for(User user: users){
             if(user.getLogin().equals(login)) {
                 if(user.rented()){
-                    System.out.println("User currently has a rented vehicle");
+                    System.out.println("com.umcsuser.current.models.User currently has a rented vehicle");
                     return false;
                 }
                 users.remove(user);

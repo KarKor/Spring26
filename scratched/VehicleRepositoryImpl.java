@@ -1,3 +1,7 @@
+package com.umcsuser.current.repositories.impl;
+
+import com.umcsuser.current.repositories.IVehicleRepository;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
@@ -5,7 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
-public class VehicleRepositoryImpl implements IVehicleRepository{
+public class VehicleRepositoryImpl implements IVehicleRepository {
     private final List<Vehicle> vehicles;
 
     public boolean validID(String id){

@@ -1,3 +1,6 @@
+import com.umcsuser.current.models.User;
+import com.umcsuser.current.repositories.IUserRepository;
+import com.umcsuser.current.repositories.impl.UserRepository;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
