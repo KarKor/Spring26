@@ -1,4 +1,4 @@
-import java.util.Objects;
+package com.umcsuser.current.models;
 
 public class User {
     private String login;
@@ -6,6 +6,7 @@ public class User {
     private Role role;
     private String rentedVehicleID;
     private boolean online;
+    private String ID;
 
     public User(String login, String password, Role role){
         this.login = login;
@@ -29,6 +30,14 @@ public class User {
 
     public String getLogin() {
         return login;
+    }
+
+    public String getID() {
+        return ID;
+    }
+
+    public void setID(String ID) {
+        this.ID = ID;
     }
 
     public String getPassword() {

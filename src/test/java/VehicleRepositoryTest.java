@@ -1,3 +1,7 @@
+import com.umcsuser.current.models.Car;
+import com.umcsuser.current.models.Vehicle;
+import com.umcsuser.current.repositories.IVehicleRepository;
+import com.umcsuser.current.repositories.impl.VehicleRepositoryImpl;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;

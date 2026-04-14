@@ -1,4 +1,5 @@
-import java.util.ArrayList;
+package com.umcsuser.current.repositories;
+
 import java.util.List;
 
 public interface IUserRepository {

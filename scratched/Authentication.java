@@ -1,10 +1,14 @@
+import com.umcsuser.current.models.Role;
+import com.umcsuser.current.models.User;
+import com.umcsuser.current.repositories.impl.UserJsonRepository;
+
 import java.util.List;
 
 public class Authentication {
 
-    private final IUserRepository userRepository;
+    private final UserJsonRepository userRepository;
 
-    public Authentication(IUserRepository userRepository) {
+    public Authentication(UserJsonRepository userRepository) {
         this.userRepository = userRepository;
     }
 
@@ -27,7 +31,7 @@ public class Authentication {
                 return null;
             }
         }
-        userRepository.add(new User(login,Authentication.hashPassword(password),Role.USER));
+        userRepository.add(new User(login,Authentication.hashPassword(password), Role.USER));
         System.out.println("Registered successfully");
         return new User(login,Authentication.hashPassword(password),Role.USER);
     }

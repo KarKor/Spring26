@@ -1,3 +1,5 @@
+package com.umcsuser.current.repositories;
+
 import java.util.List;
 
 public interface IVehicleRepository {

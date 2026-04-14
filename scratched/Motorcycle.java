@@ -1,4 +1,6 @@
-public class Motorcycle extends Vehicle{
+package com.umcsuser.current.models;
+
+public class Motorcycle extends Vehicle {
     private MotorcycleCategory category;
 
     public Motorcycle(String insideID, String brand, String model, int year, double price, boolean rented, MotorcycleCategory category) {

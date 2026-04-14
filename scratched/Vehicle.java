@@ -1,3 +1,5 @@
+package com.umcsuser.current.models;
+
 public abstract class Vehicle {
     protected String brand;
     protected String model;
@@ -23,6 +25,10 @@ public abstract class Vehicle {
 
     public String getInsideID() {
         return insideID;
+    }
+
+    public void setInsideID(String insideID) {
+        this.insideID = insideID;
     }
 
     public String getModel() {
