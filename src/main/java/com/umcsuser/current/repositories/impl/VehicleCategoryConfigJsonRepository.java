@@ -10,10 +10,8 @@ import java.util.List;
 import java.util.Optional;
 
 public class VehicleCategoryConfigJsonRepository implements VehicleCategoryConfigRepository {
-
     private final JsonFileStorage<VehicleCategoryConfig> storage =
-            new JsonFileStorage<>("categories.json",
-                    new TypeToken<List<VehicleCategoryConfig>>() {}.getType());
+            new JsonFileStorage<>("categories.json", new TypeToken<List<VehicleCategoryConfig>>() {}.getType());
 
     private final List<VehicleCategoryConfig> configs;
 

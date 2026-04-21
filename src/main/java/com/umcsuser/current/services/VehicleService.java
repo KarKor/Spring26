@@ -8,37 +8,43 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class VehicleService {
-    private final VehicleRepository vehicleRepo;
+    private final VehicleValidator vehicleValidator;
+    private final VehicleRepository vehicleRepository;
     private final RentalRepository rentalRepo;
 
-    public VehicleService(VehicleRepository vehicleRepo, RentalRepository rentalRepo) {
-        this.vehicleRepo = vehicleRepo;
+    public VehicleService(VehicleValidator vehicleValidator, VehicleRepository vehicleRepository, RentalRepository rentalRepo) {
+        this.vehicleValidator = vehicleValidator;
+        this.vehicleRepository = vehicleRepository;
         this.rentalRepo = rentalRepo;
     }
 
-    public List<Vehicle> getAllVehicles() {
-        return vehicleRepo.findAll();
+    public List<Vehicle> findAllVehicles() {
+        return vehicleRepository.findAll();
     }
 
     public List<Vehicle> getAvailableVehicles() {
-        return vehicleRepo.findAll().stream()
+        return vehicleRepository.findAll().stream()
                 .filter(v -> rentalRepo.findByVehicleIdAndReturnDateIsNull(v.getId()).isEmpty())
                 .collect(Collectors.toList());
     }
 
-    public boolean addVehicle(Vehicle vehicle) {
-        if (vehicleRepo.findById(vehicle.getId()).isPresent()) {
-            return false;
+    public Vehicle addVehicle(Vehicle vehicle) {
+        if (vehicleRepository.findById(vehicle.getId()).isPresent()) {
+            throw new IllegalArgumentException("Pojazd o tym ID już istnieje.");
         }
-        vehicleRepo.save(vehicle);
-        return true;
+        vehicleValidator.validate(vehicle);
+        vehicleRepository.save(vehicle);
+        return vehicle;
     }
 
-    public boolean removeVehicle(String id) {
-        if (rentalRepo.findByVehicleIdAndReturnDateIsNull(id).isPresent()) {
-            return false;
+    public void removeVehicle(String vehicleId) {
+        Vehicle vehicle = vehicleRepository.findById(vehicleId)
+                .orElseThrow(() -> new IllegalArgumentException("Nie znaleziono pojazdu."));
+
+        boolean rented = rentalRepo.findByVehicleIdAndReturnDateIsNull(vehicleId).isPresent();
+        if (rented) {
+            throw new IllegalStateException("Nie można usunąć pojazdu, bo jest aktualnie wypożyczony.");
         }
-        vehicleRepo.deleteById(id);
-        return true;
+        vehicleRepository.deleteById(vehicle.getId());
     }
 }

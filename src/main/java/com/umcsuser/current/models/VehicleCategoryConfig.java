@@ -1,7 +1,6 @@
 package com.umcsuser.current.models;
 
 import lombok.*;
-
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -12,6 +11,7 @@ import java.util.Map;
 @ToString
 public class VehicleCategoryConfig {
     private String category;
+
     @Getter(AccessLevel.NONE)
     @Setter(AccessLevel.NONE)
     private Map<String, String> attributes = new HashMap<>();
@@ -26,13 +26,8 @@ public class VehicleCategoryConfig {
         return Collections.unmodifiableMap(attributes);
     }
 
-    public void addAttribute(String name, String type) {
-        attributes.put(name, type);
-    }
-
-    public void removeAttribute(String name) {
-        attributes.remove(name);
-    }
+    public void addAttribute(String name, String type) { attributes.put(name, type); }
+    public void removeAttribute(String name) { attributes.remove(name); }
 
     public VehicleCategoryConfig copy() {
         return VehicleCategoryConfig.builder()

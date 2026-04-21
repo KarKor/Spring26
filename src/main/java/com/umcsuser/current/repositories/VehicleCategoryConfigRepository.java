@@ -1,7 +1,6 @@
 package com.umcsuser.current.repositories;
 
 import com.umcsuser.current.models.VehicleCategoryConfig;
-
 import java.util.List;
 import java.util.Optional;
 
