@@ -3,25 +3,16 @@ package com.umcsuser.current.services;
 import com.umcsuser.current.models.VehicleCategoryConfig;
 import com.umcsuser.current.repositories.VehicleCategoryConfigRepository;
 
-import java.util.List;
+import java.util.Optional;
 
 public class VehicleCategoryConfigService {
-    private final VehicleCategoryConfigRepository configRepository;
+    private final VehicleCategoryConfigRepository repository;
 
-    public VehicleCategoryConfigService(VehicleCategoryConfigRepository configRepository) {
-        this.configRepository = configRepository;
+    public VehicleCategoryConfigService(VehicleCategoryConfigRepository repository) {
+        this.repository = repository;
     }
 
-    public List<VehicleCategoryConfig> findAllCategories() {
-        return configRepository.findAll();
-    }
-
-    public VehicleCategoryConfig getByCategory(String category) {
-        return configRepository.findByCategory(category)
-                .orElseThrow(() -> new IllegalArgumentException("Nieznana kategoria pojazdu: " + category));
-    }
-
-    public boolean categoryExists(String category) {
-        return configRepository.findByCategory(category).isPresent();
+    public Optional<VehicleCategoryConfig> getConfigForCategory(String category) {
+        return repository.findByCategory(category);
     }
 }

@@ -2,8 +2,10 @@ package com.umcsuser.current.services;
 
 import com.umcsuser.current.models.Vehicle;
 import com.umcsuser.current.models.VehicleCategoryConfig;
+import com.umcsuser.current.services.VehicleCategoryConfigService;
 
 import java.util.Map;
+import java.util.Optional;
 
 public class VehicleValidator {
     private final VehicleCategoryConfigService configService;
@@ -13,60 +15,60 @@ public class VehicleValidator {
     }
 
     public void validate(Vehicle vehicle) {
-        if (vehicle == null) throw new IllegalArgumentException("Pojazd nie może być nullem.");
-        validateBaseFields(vehicle);
-        // Wykorzystujemy getCategory() aby pobrać wzorzec z serwisu
-        validateAttributes(vehicle.getAtributes(), configService.getByCategory(vehicle.getCategory()));
-    }
+        if (vehicle.getBrand() == null || vehicle.getBrand().isBlank()) throw new IllegalArgumentException("Brand is required.");
+        if (vehicle.getModel() == null || vehicle.getModel().isBlank()) throw new IllegalArgumentException("Model is required.");
+        if (vehicle.getPlate() == null || vehicle.getPlate().isBlank()) throw new IllegalArgumentException("Plate is required.");
+        if (vehicle.getYear() <= 1900) throw new IllegalArgumentException("Invalid production year.");
+        if (vehicle.getPrice() <= 0) throw new IllegalArgumentException("Price must be higher than 0.");
+        if (vehicle.getCategory() == null || vehicle.getCategory().isBlank()) throw new IllegalArgumentException("Category is required.");
 
-    private void validateBaseFields(Vehicle vehicle) {
-        requireNonBlank(vehicle.getCategory(), "Kategoria jest wymagana.");
-        requireNonBlank(vehicle.getBrand(), "Marka jest wymagana.");
-        requireNonBlank(vehicle.getModel(), "Model jest wymagany.");
-        requireNonBlank(vehicle.getPlate(), "Numer rejestracyjny jest wymagany.");
-
-        if (vehicle.getYear() <= 0) throw new IllegalArgumentException("Rok musi być dodatni.");
-        if (vehicle.getPrice() < 0) throw new IllegalArgumentException("Cena nie może być ujemna.");
-    }
-
-    private void validateAttributes(Map<String, Object> actualAttributes, VehicleCategoryConfig config) {
-        Map<String, String> expectedAttributes = config.getAttributes();
-
-        // Sprawdzenie czy nie ma nadmiarowych atrybutów
-        for (String actualName : actualAttributes.keySet()) {
-            if (!expectedAttributes.containsKey(actualName)) {
-                throw new IllegalArgumentException("Nieobsługiwany atrybut dla kategorii " + config.getCategory() + ": " + actualName);
-            }
+        Optional<VehicleCategoryConfig> configOpt = configService.getConfigForCategory(vehicle.getCategory());
+        if (configOpt.isEmpty()) {
+            throw new IllegalArgumentException("Unknown vehicle category: " + vehicle.getCategory());
         }
 
-        // Sprawdzenie czy są wszystkie atrybuty i mają poprawny typ
-        expectedAttributes.forEach((String attrName, String expectedType) -> {
-            Object value = actualAttributes.get(attrName);
-            if (value == null) {
-                throw new IllegalArgumentException("Brak wymaganego atrybutu: " + attrName);
-            }
+        VehicleCategoryConfig config = configOpt.get();
+        Map<String, String> expectedAttributes = config.getAttributes();
+        Map<String, Object> actualAttributes = vehicle.getAttributes();
 
-            if (expectedType.equalsIgnoreCase("string") && value instanceof String str) {
-                requireNonBlank(str, "Atrybut " + attrName + " nie może być pusty.");
-            }
+        if (expectedAttributes != null) {
+            for (Map.Entry<String, String> entry : expectedAttributes.entrySet()) {
+                String attrName = entry.getKey();
+                String attrType = entry.getValue();
 
-            boolean isValidType = switch (expectedType.toLowerCase()) {
-                case "string" -> value instanceof String;
-                case "number" -> value instanceof Number;
-                case "boolean" -> value instanceof Boolean || (value instanceof String s && (s.equalsIgnoreCase("true") || s.equalsIgnoreCase("false")));
-                case "integer" -> value instanceof Integer || (value instanceof String s && s.matches("-?\\d+"));
-                default -> throw new IllegalArgumentException("Nieobsługiwany typ w configu: " + expectedType);
-            };
+                if (!actualAttributes.containsKey(attrName)) {
+                    throw new IllegalArgumentException("A required attribute is missing: " + attrName + " for category " + vehicle.getCategory());
+                }
 
-            if (!isValidType) {
-                throw new IllegalArgumentException("Atrybut " + attrName + " musi być typu " + expectedType + ".");
+                Object value = actualAttributes.get(attrName);
+                validateType(attrName, value, attrType);
             }
-        });
+        }
     }
 
-    private void requireNonBlank(String value, String message) {
-        if (value == null || value.isBlank()) {
-            throw new IllegalArgumentException(message);
+    private void validateType(String attrName, Object value, String expectedType) {
+        if (value == null) throw new IllegalArgumentException("Attribute " + attrName + " cannot be empty.");
+
+        try {
+            switch (expectedType.toLowerCase()) {
+                case "integer":
+                    Integer.parseInt(value.toString());
+                    break;
+                case "double":
+                    Double.parseDouble(value.toString());
+                    break;
+                case "string":
+                    break;
+                case "boolean":
+                    if (!value.toString().equalsIgnoreCase("true") && !value.toString().equalsIgnoreCase("false")) {
+                        throw new IllegalArgumentException("Attribute " + attrName + " must be of type boolean (true/false).");
+                    }
+                    break;
+                default:
+                    break;
+            }
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("Attribute " + attrName + " must be of type " + expectedType);
         }
     }
 }
