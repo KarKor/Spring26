@@ -1,7 +1,10 @@
 package com.umcsuser.current.services;
 
+import com.umcsuser.current.models.User;
 import com.umcsuser.current.repositories.RentalRepository;
 import com.umcsuser.current.repositories.UserRepository;
+
+import java.util.List;
 
 public class UserService {
     private final UserRepository userRepo;
@@ -21,5 +24,9 @@ public class UserService {
         }
 
         userRepo.deleteById(userId);
+    }
+
+    public List<User> getAllUsers() {
+        return userRepo.findAll();
     }
 }

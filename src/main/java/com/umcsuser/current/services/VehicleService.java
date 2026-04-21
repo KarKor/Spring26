@@ -11,7 +11,7 @@ import java.util.stream.Collectors;
 public class VehicleService {
     private final VehicleRepository vehicleRepo;
     private final RentalRepository rentalRepo;
-    private final VehicleValidator vehicleValidator; // Nowy walidator
+    private final VehicleValidator vehicleValidator;
 
     public VehicleService(VehicleRepository vehicleRepo, RentalRepository rentalRepo, VehicleValidator vehicleValidator) {
         this.vehicleRepo = vehicleRepo;
@@ -41,7 +41,7 @@ public class VehicleService {
 
     public boolean removeVehicle(String id) {
         if (rentalRepo.findByVehicleIdAndReturnDateIsNull(id).isPresent()) {
-            throw new IllegalStateException("Nie można usunąć pojazdu, bo jest aktualnie wypożyczony.");
+            throw new IllegalStateException("Cannot remove a rented vehicle.");
         }
         vehicleRepo.deleteById(id);
         return true;

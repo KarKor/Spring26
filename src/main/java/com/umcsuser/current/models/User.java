@@ -1,5 +1,6 @@
 package com.umcsuser.current.models;
 import lombok.*;
+import com.google.gson.annotations.SerializedName;
 
 @Getter
 @Setter
@@ -10,7 +11,9 @@ import lombok.*;
 @ToString(exclude = "passwordHash")
 
 public class User {
+    @SerializedName("id")
     private String ID;
+
     private String login;
     private String passwordHash;
     private Role role;

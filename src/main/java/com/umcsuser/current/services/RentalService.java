@@ -1,6 +1,7 @@
 package com.umcsuser.current.services;
 
 import com.umcsuser.current.models.Rental;
+import com.umcsuser.current.models.User;
 import com.umcsuser.current.models.Vehicle;
 import com.umcsuser.current.repositories.RentalRepository;
 import com.umcsuser.current.repositories.VehicleRepository;
@@ -52,9 +53,14 @@ public class RentalService {
 
     public List<Vehicle> getUserActiveRentals(String userId) {
         return rentalRepo.findAll().stream()
-                .filter(r -> r.getUserId().equals(userId) && r.isActive())
+                .filter(r -> java.util.Objects.equals(r.getUserId(), userId) && r.isActive())
                 .map(r -> vehicleRepo.findById(r.getVehicleId()).orElse(null))
                 .filter(v -> v != null)
                 .collect(Collectors.toList());
     }
+
+    public List<Rental> getAllRentals() {
+        return rentalRepo.findAll();
+    }
+
 }
