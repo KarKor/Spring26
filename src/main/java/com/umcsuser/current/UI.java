@@ -19,6 +19,7 @@ public class UI {
 
     private final Scanner scanner;
     private User loggedUser;
+    boolean exit=false;
 
     public UI(AuthService authService, VehicleService vehicleService, RentalService rentalService,
               UserService userService, VehicleCategoryConfigService configService) {
@@ -31,10 +32,12 @@ public class UI {
     }
 
     public void start() {
-        handleLogin();
-        if (loggedUser != null) {
-            System.out.println("Welcome, " + loggedUser.getLogin() + " (" + loggedUser.getRole() + ")");
-            handleMainMenu();
+        while(!exit){
+            handleLogin();
+            if (loggedUser != null) {
+                System.out.println("Welcome, " + loggedUser.getLogin() + " (" + loggedUser.getRole() + ")");
+                handleMainMenu();
+            }
         }
     }
 
@@ -42,7 +45,10 @@ public class UI {
         while (loggedUser == null) {
             System.out.println("1. Login\n2. Register\n3. Exit");
             String choice = scanner.nextLine();
-            if (choice.equals("3")) return;
+            if (choice.equals("3")) {
+                exit=true;
+                return;
+            }
 
             if (choice.equals("1")) {
                 System.out.println("Login:");
@@ -79,7 +85,7 @@ public class UI {
                 System.out.println("9. Remove vehicle");
                 System.out.println("10. Remove user");
             }
-            System.out.println("0. Exit");
+            System.out.println("0. Log out");
 
             String input = scanner.nextLine();
             int option;
@@ -90,7 +96,10 @@ public class UI {
                 continue;
             }
 
-            if (option == 0) break;
+            if (option == 0){
+                loggedUser=null;
+                break;
+            }
 
             switch (option) {
                 case 1 -> vehicleService.getAllVehicles().forEach(System.out::println);
