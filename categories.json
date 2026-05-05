@@ -8,14 +8,14 @@
   {
     "category": "Motorcycle",
     "attributes": {
-      "licence": "string",
-      "fuelType": "string"
+      "drive": "string",
+      "licence": "string"
     }
   },
   {
     "category": "Bus",
     "attributes": {
-      "seats": "integer"
+      "seats": "number"
     }
   }
 ]

@@ -162,7 +162,6 @@ public class UI {
     }
 
     private void addVehicleFlow() {
-        //String id = UUID.randomUUID().toString();
         try {
             System.out.println("Insert Brand:");
             String brand = scanner.nextLine();
@@ -186,9 +185,7 @@ public class UI {
                     System.out.println("Enter value for " + entry.getKey() + ":");
                     String val = scanner.nextLine();
                     switch (entry.getValue().toLowerCase()) {
-                        case "integer" -> attributes.put(entry.getKey(), Integer.parseInt(val));
-                        case "number" -> attributes.put(entry.getKey(), Double.parseDouble(val));
-                        case "boolean" -> attributes.put(entry.getKey(), Boolean.parseBoolean(val));
+                        case "number" -> attributes.put(entry.getKey(), Integer.parseInt(val));
                         default -> attributes.put(entry.getKey(), val);
                     }
                 }
