@@ -3,12 +3,10 @@ package com.umcsuser.current;
 import com.umcsuser.current.models.Role;
 import com.umcsuser.current.models.User;
 import com.umcsuser.current.models.Vehicle;
+import com.umcsuser.current.models.VehicleCategoryConfig;
 import com.umcsuser.current.services.*;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Scanner;
+import java.util.*;
 
 public class UI {
     private final AuthService authService;
@@ -164,9 +162,8 @@ public class UI {
     }
 
     private void addVehicleFlow() {
+        //String id = UUID.randomUUID().toString();
         try {
-            System.out.println("Insert ID:");
-            String id = scanner.nextLine();
             System.out.println("Insert Brand:");
             String brand = scanner.nextLine();
             System.out.println("Insert Model:");
@@ -182,20 +179,30 @@ public class UI {
             String category = scanner.nextLine();
 
             Map<String, Object> attributes = new HashMap<>();
-            configService.getConfigForCategory(category).ifPresent(config -> {
-                if (config.getAttributes() != null) {
-                    System.out.println("Adding attributes for category: " + category);
-                    for (String attrName : config.getAttributes().keySet()) {
-                        System.out.println("Enter value for " + attrName + ":");
-                        attributes.put(attrName, scanner.nextLine());
+            VehicleCategoryConfig config = configService.getByCategory(category);
+            if (config.getAttributes() != null) {
+                System.out.println("Adding attributes for category: " + category);
+                for (Map.Entry<String, String> entry : config.getAttributes().entrySet()) {
+                    System.out.println("Enter value for " + entry.getKey() + ":");
+                    String val = scanner.nextLine();
+                    switch (entry.getValue().toLowerCase()) {
+                        case "integer" -> attributes.put(entry.getKey(), Integer.parseInt(val));
+                        case "number" -> attributes.put(entry.getKey(), Double.parseDouble(val));
+                        case "boolean" -> attributes.put(entry.getKey(), Boolean.parseBoolean(val));
+                        default -> attributes.put(entry.getKey(), val);
                     }
                 }
-            });
+            }
 
             Vehicle newVehicle = Vehicle.builder()
-                    .id(id).brand(brand).model(model)
-                    .year(year).plate(plate).price(price)
-                    .category(category).attributes(attributes)
+                    .id(UUID.randomUUID().toString())
+                    .brand(brand)
+                    .model(model)
+                    .year(year)
+                    .plate(plate)
+                    .price(price)
+                    .category(category)
+                    .attributes(attributes)
                     .build();
 
             if (vehicleService.addVehicle(newVehicle)) {

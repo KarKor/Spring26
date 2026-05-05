@@ -1,10 +1,6 @@
 package com.umcsuser.current.models;
 
-import lombok.AccessLevel;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -12,8 +8,13 @@ import java.util.Map;
 
 @Getter
 @Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder(toBuilder = true)
+@EqualsAndHashCode(of = "id")
 @ToString
 public class Vehicle {
+
     private String id;
     private String category;
     private String brand;
@@ -22,28 +23,63 @@ public class Vehicle {
     private String plate;
     private double price;
 
-    @Getter(AccessLevel.NONE)
-    @Setter(AccessLevel.NONE)
-    private Map<String, Object> attributes = new HashMap<>();
-
-    @Builder
-    public Vehicle(String id, String category, String brand, String model, int year, String plate, double price, Map<String, Object> attributes) {
-        this.id = id;
-        this.category = category;
-        this.brand = brand;
-        this.model = model;
-        this.year = year;
-        this.plate = plate;
-        this.price = price;
-        this.attributes = attributes == null ? new HashMap<>() : new HashMap<>(attributes);
+    public Vehicle build() {
+        String newId = (id == null || id.isBlank()) ? java.util.UUID.randomUUID().toString() : id;
+        Vehicle vehicle;
+        if ("Car".equalsIgnoreCase(category)) {
+            vehicle = Vehicle.builder()
+                    .id(newId)
+                    .category(category)
+                    .brand(brand)
+                    .model(model)
+                    .year(year)
+                    .plate(plate)
+                    .price(price)
+                    .attributes(new HashMap<>(attributes))
+                    .build();
+        } else if ("Motorcycle".equalsIgnoreCase(category)) {
+            vehicle = Vehicle.builder()
+                    .id(newId)
+                    .category(category)
+                    .brand(brand)
+                    .model(model)
+                    .year(year)
+                    .plate(plate)
+                    .price(price)
+                    .attributes(new HashMap<>(attributes))
+                    .build();
+        } else {
+            vehicle = Vehicle.builder()
+                    .id(newId)
+                    .category(category)
+                    .brand(brand)
+                    .model(model)
+                    .year(year)
+                    .plate(plate)
+                    .price(price)
+                    .attributes(new HashMap<>(attributes))
+                    .build();
+        }
+        vehicle.setCategory(category);
+        if (plate != null) {
+            vehicle.addAttribute("plate", plate);
+        }
+        return vehicle;
     }
+
+
+    private Map<String, Object> attributes = new HashMap<>();
 
     public Map<String, Object> getAttributes() {
         return Collections.unmodifiableMap(attributes);
     }
 
-    public Object getAttributes(String key) {
+    public Object getAttribute(String key) {
         return attributes.get(key);
+    }
+
+    public String getId(){
+        return id;
     }
 
     public void addAttribute(String key, Object value) {
@@ -66,5 +102,4 @@ public class Vehicle {
                 .attributes(new HashMap<>(attributes))
                 .build();
     }
-
 }

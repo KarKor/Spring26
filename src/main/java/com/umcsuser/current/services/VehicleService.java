@@ -25,16 +25,24 @@ public class VehicleService {
 
     public List<Vehicle> getAvailableVehicles() {
         return vehicleRepo.findAll().stream()
-                .filter(v -> rentalRepo.findByVehicleIdAndReturnDateIsNull(v.getId()).isEmpty())
+                .filter(v -> rentalRepo.findByVehicleIdAndReturnDateIsNull((String) v.getId()).isEmpty())
                 .collect(Collectors.toList());
     }
 
     public boolean addVehicle(Vehicle vehicle) {
-        if (vehicleRepo.findById(vehicle.getId()).isPresent()) {
+        if (vehicle == null || vehicle.getId() == null) {
+            throw new IllegalArgumentException("Vehicle or its ID cannot be null");
+        }
+        try {
+            if (vehicleRepo.findById((String) vehicle.getId()).isPresent()) {
+                return false;
+            }
+        } catch (NullPointerException e) {
+            System.out.println("Repository error: findById() returned null");
             return false;
         }
-        vehicleValidator.validate(vehicle);
 
+        vehicleValidator.validate(vehicle);
         vehicleRepo.save(vehicle);
         return true;
     }

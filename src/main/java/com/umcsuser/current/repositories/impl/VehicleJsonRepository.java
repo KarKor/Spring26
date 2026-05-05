@@ -20,13 +20,18 @@ public class VehicleJsonRepository implements VehicleRepository {
 
     @Override
     public Optional<Vehicle> findById(String id) {
-        return findAll().stream().filter(v -> v.getId().equals(id)).findFirst();
+        return findAll().stream()
+                .filter(v -> v.getId() != null && v.getId().equals(id))
+                .findFirst();
     }
 
     @Override
     public Vehicle save(Vehicle vehicle) {
+        if (vehicle == null || vehicle.getId() == null) {
+            throw new IllegalArgumentException("Vehicle and ID cannot be null");
+        }
         List<Vehicle> vehicles = findAll();
-        vehicles.removeIf(v -> v.getId().equals(vehicle.getId()));
+        vehicles.removeIf(v -> v.getId() != null && v.getId().equals(vehicle.getId()));
         vehicles.add(vehicle);
         storage.save(vehicles);
         return vehicle;
@@ -35,7 +40,7 @@ public class VehicleJsonRepository implements VehicleRepository {
     @Override
     public void deleteById(String id) {
         List<Vehicle> vehicles = findAll();
-        vehicles.removeIf(v -> v.getId().equals(id));
+        vehicles.removeIf(v -> v.getId() != null && v.getId().equals(id));
         storage.save(vehicles);
     }
 }

@@ -8,6 +8,7 @@ import com.umcsuser.current.repositories.VehicleRepository;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -55,7 +56,7 @@ public class RentalService {
         return rentalRepo.findAll().stream()
                 .filter(r -> java.util.Objects.equals(r.getUserId(), userId) && r.isActive())
                 .map(r -> vehicleRepo.findById(r.getVehicleId()).orElse(null))
-                .filter(v -> v != null)
+                .filter(Objects::nonNull)
                 .collect(Collectors.toList());
     }
 
