@@ -7,10 +7,32 @@ import com.umcsuser.current.services.VehicleValidator;
 
 public class Main {
     public static void main(String[] args) {
+        boolean useJdbc = false;
+
+        for (String arg : args) {
+            if ("--storage-jdbc".equals(arg)) {
+                useJdbc = true;
+                break;
+            }
+        }
+
+        UserRepository userRepo;
+        VehicleRepository vehicleRepo;
+        RentalRepository rentalRepo;
+
         VehicleCategoryConfigRepository configRepo = new VehicleCategoryConfigJsonRepository("categories.json");
-        UserRepository userRepo = new UserJsonRepository("users.json");
-        VehicleRepository vehicleRepo = new VehicleJsonRepository("vehicles.json");
-        RentalRepository rentalRepo = new RentalJsonRepository("rentals.json");
+
+        if (useJdbc) {
+            System.out.println("App initialized using JDBC");
+            userRepo = new UserJdbcRepository();
+            vehicleRepo = new VehicleJdbcRepository();
+            rentalRepo = new RentalJdbcRepository();
+        } else {
+            System.out.println("App initialized using JSON");
+            userRepo = new UserJsonRepository("users.json");
+            vehicleRepo = new VehicleJsonRepository("vehicles.json");
+            rentalRepo = new RentalJsonRepository("rentals.json");
+        }
 
         VehicleCategoryConfigService configService = new VehicleCategoryConfigService(configRepo);
         VehicleValidator vehicleValidator = new VehicleValidator(configService);
