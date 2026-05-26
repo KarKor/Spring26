@@ -1,5 +1,6 @@
 package com.umcsuser.current;
 
+import com.umcsuser.current.models.Rental;
 import com.umcsuser.current.models.Role;
 import com.umcsuser.current.models.User;
 import com.umcsuser.current.models.Vehicle;
@@ -9,18 +10,21 @@ import com.umcsuser.current.services.*;
 import java.util.*;
 
 public class UI {
-    private final AuthService authService;
-    private final VehicleService vehicleService;
-    private final RentalService rentalService;
-    private final UserService userService;
+    private final AuthServiceInterface authService;
+    private final VehicleServiceInterface vehicleService;
+    private final RentalServiceInterface rentalService;
+    private final UserServiceInterface userService;
     private final VehicleCategoryConfigService configService;
 
     private final Scanner scanner;
     private User loggedUser;
-    boolean exit=false;
+    boolean exit = false;
 
-    public UI(AuthService authService, VehicleService vehicleService, RentalService rentalService,
-              UserService userService, VehicleCategoryConfigService configService) {
+    public UI(AuthServiceInterface authService,
+              VehicleServiceInterface vehicleService,
+              RentalServiceInterface rentalService,
+              UserServiceInterface userService,
+              VehicleCategoryConfigService configService) {
         this.authService = authService;
         this.vehicleService = vehicleService;
         this.rentalService = rentalService;
@@ -53,15 +57,26 @@ public class UI {
                 String login = scanner.nextLine();
                 System.out.println("Password:");
                 String password = scanner.nextLine();
-                loggedUser = authService.login(login, password);
-                if (loggedUser == null) System.out.println("Invalid credentials.");
+
+                Optional<User> userOpt = authService.login(login, password);
+                if (userOpt.isPresent()) {
+                    loggedUser = userOpt.get();
+                } else {
+                    System.out.println("Invalid credentials.");
+                }
+
             } else if (choice.equals("2")) {
                 System.out.println("Login:");
                 String login = scanner.nextLine();
                 System.out.println("Password:");
                 String password = scanner.nextLine();
-                loggedUser = authService.register(login, password);
-                if (loggedUser == null) System.out.println("Registration failed.");
+
+                boolean success = authService.register(login, password);
+                if (success) {
+                    System.out.println("Registration successful. You can now log in.");
+                } else {
+                    System.out.println("Registration failed.");
+                }
             } else {
                 System.out.println("Invalid option.");
             }
@@ -100,13 +115,13 @@ public class UI {
             }
 
             switch (option) {
-                case 1 -> vehicleService.getAllVehicles().forEach(System.out::println);
-                case 2 -> vehicleService.getAvailableVehicles().forEach(System.out::println);
+                case 1 -> vehicleService.findAllVehicles().forEach(System.out::println);
+                case 2 -> vehicleService.findAvailableVehicles().forEach(System.out::println);
                 case 3 -> rentVehicleFlow();
                 case 4 -> viewRentedVehicle();
                 case 5 -> returnVehicleFlow();
-                case 6 -> userService.getAllUsers().forEach(System.out::println);
-                case 7 -> rentalService.getAllRentals().forEach(System.out::println);
+                case 6 -> userService.findAllUsers().forEach(System.out::println);
+                case 7 -> rentalService.findAllRentals().forEach(System.out::println);
                 case 8 -> { if (isAdmin()) addVehicleFlow(); }
                 case 9 -> { if (isAdmin()) removeVehicleFlow(); }
                 case 10 -> { if (isAdmin()) removeUserFlow(); }
@@ -126,38 +141,30 @@ public class UI {
     private void rentVehicleFlow() {
         System.out.println("Insert vehicle ID to rent:");
         String vehicleId = scanner.nextLine();
-        if (rentalService.rentVehicle(loggedUser.getID(), vehicleId)) {
+        try {
+            rentalService.rentVehicle(loggedUser.getId(), vehicleId);
             System.out.println("Vehicle rented successfully.");
-        } else {
-            System.out.println("Error: Vehicle not found or already rented.");
+        } catch (Exception e) {
+            System.out.println("Error: " + e.getMessage());
         }
     }
 
     private void viewRentedVehicle(){
-        List<Vehicle> activeRentals = rentalService.getUserActiveRentals(loggedUser.getID());
-        if (activeRentals.isEmpty()) {
+        Optional<Rental> activeRental = rentalService.findActiveRentalByUserId(loggedUser.getId());
+        if (activeRental.isEmpty()) {
             System.out.println("No active rentals.");
             return;
         }
 
-        activeRentals.forEach(System.out::println);
+        System.out.println(activeRental.get().getVehicle());
     }
 
     private void returnVehicleFlow() {
-        List<Vehicle> activeRentals = rentalService.getUserActiveRentals(loggedUser.getID());
-        if (activeRentals.isEmpty()) {
-            System.out.println("No active rentals.");
-            return;
-        }
-
-        activeRentals.forEach(System.out::println);
-        System.out.println("Insert vehicle ID:");
-        String vehicleId = scanner.nextLine();
-
-        if (rentalService.returnVehicle(loggedUser.getID(), vehicleId)) {
+        try {
+            rentalService.returnVehicle(loggedUser.getId());
             System.out.println("Vehicle returned successfully.");
-        } else {
-            System.out.println("Error: Invalid vehicle ID.");
+        } catch (IllegalStateException e) {
+            System.out.println("Error: " + e.getMessage());
         }
     }
 
@@ -202,7 +209,8 @@ public class UI {
                     .attributes(attributes)
                     .build();
 
-            if (vehicleService.addVehicle(newVehicle)) {
+            Vehicle savedVehicle = vehicleService.addVehicle(newVehicle);
+            if (savedVehicle != null) {
                 System.out.println("Vehicle added successfully.");
             } else {
                 System.out.println("Error: Vehicle with this ID already exists.");
@@ -227,9 +235,9 @@ public class UI {
         System.out.println("Insert user ID:");
         String id = scanner.nextLine();
         try {
-            userService.removeUser(id);
+            userService.deleteUser(id, loggedUser.getId());
             System.out.println("User removed successfully.");
-        } catch (IllegalStateException e) {
+        } catch (IllegalStateException | IllegalArgumentException e) {
             System.out.println("Cannot remove user: " + e.getMessage());
         }
     }

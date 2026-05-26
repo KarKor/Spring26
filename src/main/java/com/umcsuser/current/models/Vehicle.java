@@ -1,6 +1,9 @@
 package com.umcsuser.current.models;
 
+import io.hypersistence.utils.hibernate.type.json.JsonBinaryType;
+import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.Type;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -9,66 +12,49 @@ import java.util.Map;
 @Getter
 @Setter
 @NoArgsConstructor
-@AllArgsConstructor
-@Builder(toBuilder = true)
 @EqualsAndHashCode(of = "id")
 @ToString
+@Entity
+@Table(name = "vehicle")
 public class Vehicle {
 
+    @Id
+    @Column(nullable = false, unique = true)
     private String id;
+
     private String category;
     private String brand;
     private String model;
     private int year;
     private String plate;
+
+    @Column(columnDefinition = "NUMERIC")
     private double price;
 
-    public Vehicle build() {
-        String newId = (id == null || id.isBlank()) ? java.util.UUID.randomUUID().toString() : id;
-        Vehicle vehicle;
-        if ("Car".equalsIgnoreCase(category)) {
-            vehicle = Vehicle.builder()
-                    .id(newId)
-                    .category(category)
-                    .brand(brand)
-                    .model(model)
-                    .year(year)
-                    .plate(plate)
-                    .price(price)
-                    .attributes(new HashMap<>(attributes))
-                    .build();
-        } else if ("Motorcycle".equalsIgnoreCase(category)) {
-            vehicle = Vehicle.builder()
-                    .id(newId)
-                    .category(category)
-                    .brand(brand)
-                    .model(model)
-                    .year(year)
-                    .plate(plate)
-                    .price(price)
-                    .attributes(new HashMap<>(attributes))
-                    .build();
-        } else {
-            vehicle = Vehicle.builder()
-                    .id(newId)
-                    .category(category)
-                    .brand(brand)
-                    .model(model)
-                    .year(year)
-                    .plate(plate)
-                    .price(price)
-                    .attributes(new HashMap<>(attributes))
-                    .build();
-        }
-        vehicle.setCategory(category);
-        if (plate != null) {
-            vehicle.addAttribute("plate", plate);
-        }
-        return vehicle;
-    }
-
-
+    @Type(JsonBinaryType.class)
+    @Column(columnDefinition = "jsonb")
+    @Getter(AccessLevel.NONE)
+    @Setter(AccessLevel.NONE)
     private Map<String, Object> attributes = new HashMap<>();
+
+    @Builder
+    public Vehicle(String id,
+                   String category,
+                   String brand,
+                   String model,
+                   int year,
+                   String plate,
+                   double price,
+                   Map<String, Object> attributes) {
+        this.id = id;
+        this.category = category;
+        this.brand = brand;
+        this.model = model;
+        this.year = year;
+        this.plate = plate;
+        this.price = price;
+        this.attributes = attributes == null ? new HashMap<>() : new HashMap<>(attributes);
+    }
 
     public Map<String, Object> getAttributes() {
         return Collections.unmodifiableMap(attributes);
@@ -76,10 +62,6 @@ public class Vehicle {
 
     public Object getAttribute(String key) {
         return attributes.get(key);
-    }
-
-    public String getId(){
-        return id;
     }
 
     public void addAttribute(String key, Object value) {

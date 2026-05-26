@@ -7,40 +7,61 @@ import com.umcsuser.current.services.VehicleValidator;
 
 public class Main {
     public static void main(String[] args) {
-        boolean useJdbc = false;
+        String storageType = "json";
 
         for (String arg : args) {
             if ("--storage-jdbc".equals(arg)) {
-                useJdbc = true;
+                storageType = "jdbc";
+                break;
+            } else if ("--storage-hibernate".equals(arg)) {
+                storageType = "hibernate";
                 break;
             }
         }
 
-        UserRepository userRepo;
-        VehicleRepository vehicleRepo;
-        RentalRepository rentalRepo;
+        AuthServiceInterface authService;
+        VehicleServiceInterface vehicleService;
+        RentalServiceInterface rentalService;
+        UserServiceInterface userService;
 
         VehicleCategoryConfigRepository configRepo = new VehicleCategoryConfigJsonRepository("categories.json");
-
-        if (useJdbc) {
-            System.out.println("App initialized using JDBC");
-            userRepo = new UserJdbcRepository();
-            vehicleRepo = new VehicleJdbcRepository();
-            rentalRepo = new RentalJdbcRepository();
-        } else {
-            System.out.println("App initialized using JSON");
-            userRepo = new UserJsonRepository("users.json");
-            vehicleRepo = new VehicleJsonRepository("vehicles.json");
-            rentalRepo = new RentalJsonRepository("rentals.json");
-        }
-
         VehicleCategoryConfigService configService = new VehicleCategoryConfigService(configRepo);
         VehicleValidator vehicleValidator = new VehicleValidator(configService);
 
-        AuthService authService = new AuthService(userRepo);
-        VehicleService vehicleService = new VehicleService(vehicleRepo, rentalRepo, vehicleValidator);
-        RentalService rentalService = new RentalService(rentalRepo, vehicleRepo);
-        UserService userService = new UserService(userRepo, rentalRepo);
+        if ("hibernate".equals(storageType)) {
+            System.out.println("App initialized using Hibernate");
+
+            UserHibernateRepository userRepo = new UserHibernateRepository();
+            VehicleHibernateRepository vehicleRepo = new VehicleHibernateRepository();
+            RentalHibernateRepository rentalRepo = new RentalHibernateRepository();
+
+            authService = new AuthHibernateService(userRepo);
+            vehicleService = new VehicleHibernateService(vehicleRepo, rentalRepo);
+            rentalService = new RentalHibernateService(rentalRepo, vehicleRepo, userRepo);
+            userService = new UserHibernateService(userRepo, rentalRepo);
+
+        } else if ("jdbc".equals(storageType)) {
+            System.out.println("App initialized using JDBC");
+            UserRepository userRepo = new UserJdbcRepository();
+            VehicleRepository vehicleRepo = new VehicleJdbcRepository();
+            RentalRepository rentalRepo = new RentalJdbcRepository();
+
+            authService = new AuthService(userRepo);
+            vehicleService = new VehicleService(vehicleRepo, rentalRepo, vehicleValidator);
+            rentalService = new RentalService(rentalRepo, vehicleRepo, userRepo);
+            userService = new UserService(userRepo, rentalRepo);
+
+        } else {
+            System.out.println("App initialized using JSON");
+            UserRepository userRepo = new UserJsonRepository("users.json");
+            VehicleRepository vehicleRepo = new VehicleJsonRepository("vehicles.json");
+            RentalRepository rentalRepo = new RentalJsonRepository("rentals.json");
+
+            authService = new AuthService(userRepo);
+            vehicleService = new VehicleService(vehicleRepo, rentalRepo, vehicleValidator);
+            rentalService = new RentalService(rentalRepo, vehicleRepo, userRepo);
+            userService = new UserService(userRepo, rentalRepo);
+        }
 
         UI ui = new UI(authService, vehicleService, rentalService, userService, configService);
         ui.start();

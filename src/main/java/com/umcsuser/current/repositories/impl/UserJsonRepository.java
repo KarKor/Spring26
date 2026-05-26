@@ -20,7 +20,7 @@ public class UserJsonRepository implements UserRepository {
 
     @Override
     public Optional<User> findById(String id) {
-        return findAll().stream().filter(u -> u.getID().equals(id)).findFirst();
+        return findAll().stream().filter(u -> u.getId().equals(id)).findFirst();
     }
 
     @Override
@@ -31,7 +31,7 @@ public class UserJsonRepository implements UserRepository {
     @Override
     public User save(User user) {
         List<User> users = findAll();
-        users.removeIf(u -> u.getID().equals(user.getID()));
+        users.removeIf(u -> u.getId().equals(user.getId()));
         users.add(user);
         storage.save(users);
         return user;
@@ -40,7 +40,7 @@ public class UserJsonRepository implements UserRepository {
     @Override
     public void deleteById(String id) {
         List<User> users = findAll();
-        users.removeIf(u -> u.getID().equals(id));
+        users.removeIf(u -> u.getId().equals(id));
         storage.save(users);
     }
 }

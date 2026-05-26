@@ -27,7 +27,7 @@ public class UserJdbcRepository implements UserRepository {
 
             while (rs.next()) {
                 User user = User.builder()
-                        .ID(rs.getString("id"))
+                        .id(rs.getString("id"))
                         .login(rs.getString("login"))
                         .passwordHash(rs.getString("password"))
                         .role(Role.valueOf(rs.getString("role")))
@@ -51,7 +51,7 @@ public class UserJdbcRepository implements UserRepository {
             try (ResultSet rs = stmt.executeQuery()) {
                 if (rs.next()) {
                     User user = User.builder()
-                            .ID(rs.getString("id"))
+                            .id(rs.getString("id"))
                             .login(rs.getString("login"))
                             .passwordHash(rs.getString("password"))
                             .role(Role.valueOf(rs.getString("role")))
@@ -76,9 +76,9 @@ public class UserJdbcRepository implements UserRepository {
             try (ResultSet rs = stmt.executeQuery()) {
                 if (rs.next()) {
                     User user = User.builder()
-                            .ID(rs.getString("id"))
+                            .id(rs.getString("id"))
                             .login(rs.getString("login"))
-                            .passwordHash(rs.getString("password"))
+                            .passwordHash(rs.getString("password_hash"))
                             .role(Role.valueOf(rs.getString("role")))
                             .build();
                     return Optional.of(user);
@@ -94,13 +94,13 @@ public class UserJdbcRepository implements UserRepository {
     public User save(User user) {
         boolean exists = false;
 
-        if (user.getID() == null || user.getID().isBlank()) {
-            user.setID(UUID.randomUUID().toString());
+        if (user.getId() == null || user.getId().isBlank()) {
+            user.setId(UUID.randomUUID().toString());
         } else {
             String checkSql = "SELECT 1 FROM users WHERE id = ?";
             try (Connection connection = JdbcConnectionManager.getInstance().getConnection();
                  PreparedStatement checkStmt = connection.prepareStatement(checkSql)) {
-                checkStmt.setString(1, user.getID());
+                checkStmt.setString(1, user.getId());
                 try (ResultSet rs = checkStmt.executeQuery()) {
                     exists = rs.next();
                 }
@@ -111,9 +111,9 @@ public class UserJdbcRepository implements UserRepository {
 
         String sql;
         if (exists) {
-            sql = "UPDATE users SET login = ?, password = ?, role = ? WHERE id = ?";
+            sql = "UPDATE users SET login = ?, password_hash = ?, role = ? WHERE id = ?";
         } else {
-            sql = "INSERT INTO users (login, password, role, id) VALUES (?, ?, ?, ?)";
+            sql = "INSERT INTO users (login, password_hash, role, id) VALUES (?, ?, ?, ?)";
         }
 
         try (Connection connection = JdbcConnectionManager.getInstance().getConnection();
@@ -122,7 +122,7 @@ public class UserJdbcRepository implements UserRepository {
             stmt.setString(1, user.getLogin());
             stmt.setString(2, user.getPasswordHash());
             stmt.setString(3, String.valueOf(user.getRole()));
-            stmt.setString(4, user.getID());
+            stmt.setString(4, user.getId());
 
             stmt.executeUpdate();
         } catch (SQLException e) {

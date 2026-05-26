@@ -1,4 +1,5 @@
 package com.umcsuser.current.models;
+import jakarta.persistence.*;
 import lombok.*;
 import com.google.gson.annotations.SerializedName;
 
@@ -9,18 +10,27 @@ import com.google.gson.annotations.SerializedName;
 @Builder
 @EqualsAndHashCode(of = "ID")
 @ToString(exclude = "passwordHash")
-
+@Entity
+@Table(name="users")
 public class User {
-    @SerializedName("id")
-    private String ID;
 
+    @Id
+    @Column(nullable = false, unique = true)
+    private String id;
+
+    @Column(nullable = false, unique = true)
     private String login;
+    @Column(name = "password_hash", nullable = false)
     private String passwordHash;
+
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private Role role;
 
     public User copy(){
         return User.builder()
-                .ID(ID)
+                .id(id)
                 .login(login)
                 .passwordHash(passwordHash)
                 .role(role)

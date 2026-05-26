@@ -6,7 +6,7 @@ import com.umcsuser.current.repositories.UserRepository;
 
 import java.util.List;
 
-public class UserService {
+public class UserService implements UserServiceInterface {
     private final UserRepository userRepo;
     private final RentalRepository rentalRepo;
 
@@ -15,18 +15,30 @@ public class UserService {
         this.rentalRepo = rentalRepo;
     }
 
-    public void removeUser(String userId) {
+    @Override
+    public List<User> findAllUsers() {
+        return userRepo.findAll();
+    }
+
+    @Override
+    public User findById(String id) {
+        return userRepo.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Nie znaleziono użytkownika"));
+    }
+
+    @Override
+    public void deleteUser(String id, String loggedUserId) {
+        if (id.equals(loggedUserId)) {
+            throw new IllegalStateException("Nie możesz usunąć własnego konta.");
+        }
+
         boolean hasActiveRentals = rentalRepo.findAll().stream()
-                .anyMatch(r -> r.getUserId().equals(userId) && r.isActive());
+                .anyMatch(r -> r.getUserId().equals(id) && r.isActive());
 
         if (hasActiveRentals) {
             throw new IllegalStateException("User currently has a rented vehicle.");
         }
 
-        userRepo.deleteById(userId);
-    }
-
-    public List<User> getAllUsers() {
-        return userRepo.findAll();
+        userRepo.deleteById(id);
     }
 }
