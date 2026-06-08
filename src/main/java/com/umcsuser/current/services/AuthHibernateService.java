@@ -1,11 +1,12 @@
 package com.umcsuser.current.services;
 
+import com.umcsuser.current.db.HibernateConfig;
+import com.umcsuser.current.models.Role;
 import com.umcsuser.current.models.User;
 import com.umcsuser.current.repositories.impl.UserHibernateRepository;
-import com.umcsuser.current.db.HibernateConfig;
-
 import org.hibernate.Session;
 import org.hibernate.Transaction;
+import org.mindrot.jbcrypt.BCrypt;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -20,29 +21,36 @@ public class AuthHibernateService implements AuthServiceInterface {
 
     @Override
     public boolean register(String login, String rawPassword) {
-        Transaction tx = null;
-
         try (Session session = HibernateConfig.getSessionFactory().openSession()) {
-            tx = session.beginTransaction();
+            Transaction tx = session.beginTransaction();
             userRepo.setSession(session);
 
-            if (userRepo.findByLogin(login).isPresent()) {
-                return false;
+            try {
+                if (userRepo.findByLogin(login).isPresent()) {
+                    return false;
+                }
+
+                Role assignedRole = userRepo.findAll().isEmpty() ? Role.ADMIN : Role.USER;
+                String hashedPw = BCrypt.hashpw(rawPassword, BCrypt.gensalt());
+
+                User newUser = User.builder()
+                        .id(UUID.randomUUID().toString())
+                        .login(login)
+                        .passwordHash(hashedPw)
+                        .role(assignedRole)
+                        .build();
+
+                userRepo.save(newUser);
+
+                tx.commit();
+                return true;
+
+            } catch (RuntimeException e) {
+                if (tx != null && tx.isActive()) {
+                    tx.rollback();
+                }
+                throw e;
             }
-
-            User newUser = new User();
-            newUser.setId(UUID.randomUUID().toString());
-            newUser.setLogin(login);
-            newUser.setPasswordHash(rawPassword);
-
-            userRepo.save(newUser);
-
-            tx.commit();
-            return true;
-
-        } catch (RuntimeException e) {
-            rollback(tx);
-            throw e;
         }
     }
 
@@ -51,14 +59,15 @@ public class AuthHibernateService implements AuthServiceInterface {
         try (Session session = HibernateConfig.getSessionFactory().openSession()) {
             userRepo.setSession(session);
 
-            return userRepo.findByLogin(login)
-                    .filter(user -> user.getPasswordHash().equals(rawPassword));
-        }
-    }
+            Optional<User> userOpt = userRepo.findByLogin(login);
+            if (userOpt.isPresent()) {
+                User user = userOpt.get();
 
-    private void rollback(Transaction tx) {
-        if (tx != null && tx.isActive()) {
-            tx.rollback();
+                if (BCrypt.checkpw(rawPassword, user.getPasswordHash())) {
+                    return Optional.of(user.copy());
+                }
+            }
+            return Optional.empty();
         }
     }
 }

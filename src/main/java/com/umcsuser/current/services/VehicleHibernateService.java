@@ -44,44 +44,51 @@ public class VehicleHibernateService implements VehicleServiceInterface {
         try (Session session = HibernateConfig.getSessionFactory().openSession()) {
             setSession(session);
             return vehicleRepo.findById(id)
-                    .orElseThrow(() -> new IllegalArgumentException("Nie znaleziono pojazdu o podanym id."));
+                    .orElseThrow(() -> new IllegalArgumentException("Vehicle not found."));
         }
     }
 
     @Override
     public Vehicle addVehicle(Vehicle vehicle) {
-        Transaction tx = null;
         try (Session session = HibernateConfig.getSessionFactory().openSession()) {
-            tx = session.beginTransaction();
+            Transaction tx = session.beginTransaction();
             setSession(session);
 
-            Vehicle savedVehicle = vehicleRepo.save(vehicle);
+            try {
+                Vehicle savedVehicle = vehicleRepo.save(vehicle);
 
-            tx.commit();
-            return savedVehicle;
-        } catch (RuntimeException e) {
-            rollback(tx);
-            throw e;
+                tx.commit();
+                return savedVehicle;
+            } catch (RuntimeException e) {
+                if (tx != null && tx.isActive()) {
+                    tx.rollback();
+                }
+                throw e;
+            }
         }
     }
 
     @Override
     public void removeVehicle(String vehicleId) {
-        Transaction tx = null;
         try (Session session = HibernateConfig.getSessionFactory().openSession()) {
-            tx = session.beginTransaction();
+            Transaction tx = session.beginTransaction();
             setSession(session);
 
-            boolean isRented = rentalRepo.findByVehicleIdAndReturnDateIsNull(vehicleId).isPresent();
-            if (isRented) {
-                throw new IllegalStateException("Nie można usunąć pojazdu, który jest aktualnie wypożyczony.");
-            }
+            try {
+                boolean isRented = rentalRepo.findByVehicleIdAndReturnDateIsNull(vehicleId).isPresent();
+                if (isRented) {
+                    throw new IllegalStateException("Cannot remove rented vehicle.");
+                }
 
-            vehicleRepo.deleteById(vehicleId);
-            tx.commit();
-        } catch (RuntimeException e) {
-            rollback(tx);
-            throw e;
+                vehicleRepo.deleteById(vehicleId);
+                tx.commit();
+
+            } catch (RuntimeException e) {
+                if (tx != null && tx.isActive()) {
+                    tx.rollback();
+                }
+                throw e;
+            }
         }
     }
 
@@ -96,11 +103,5 @@ public class VehicleHibernateService implements VehicleServiceInterface {
     private void setSession(Session session) {
         vehicleRepo.setSession(session);
         rentalRepo.setSession(session);
-    }
-
-    private void rollback(Transaction tx) {
-        if (tx != null && tx.isActive()) {
-            tx.rollback();
-        }
     }
 }

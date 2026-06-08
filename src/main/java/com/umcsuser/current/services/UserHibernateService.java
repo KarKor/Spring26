@@ -33,44 +33,42 @@ public class UserHibernateService implements UserServiceInterface {
         try (Session session = HibernateConfig.getSessionFactory().openSession()) {
             setSession(session);
             return userRepo.findById(id)
-                    .orElseThrow(() -> new IllegalArgumentException("Nie znaleziono użytkownika o podanym id."));
+                    .orElseThrow(() -> new IllegalArgumentException("User with provided id not found."));
         }
     }
 
     @Override
     public void deleteUser(String id, String loggedUserId) {
-        Transaction tx = null;
         try (Session session = HibernateConfig.getSessionFactory().openSession()) {
-            tx = session.beginTransaction();
+            Transaction tx = session.beginTransaction();
             setSession(session);
 
-            if (id.equals(loggedUserId)) {
-                throw new IllegalStateException("Nie możesz usunąć własnego konta.");
+            try {
+                if (id.equals(loggedUserId)) {
+                    throw new IllegalStateException("You cannot remove your own account.");
+                }
+
+                boolean hasActiveRentals = rentalRepo.findAll().stream()
+                        .anyMatch(r -> id.equals(r.getUserId()) && r.isActive());
+
+                if (hasActiveRentals) {
+                    throw new IllegalStateException("Cannot remove user with unreturned rentals.");
+                }
+
+                userRepo.deleteById(id);
+                tx.commit();
+
+            } catch (RuntimeException e) {
+                if (tx != null && tx.isActive()) {
+                    tx.rollback();
+                }
+                throw e;
             }
-
-            boolean hasActiveRentals = rentalRepo.findAll().stream()
-                    .anyMatch(r -> id.equals(r.getUserId()) && r.isActive());
-
-            if (hasActiveRentals) {
-                throw new IllegalStateException("Nie można usunąć użytkownika, który posiada niezwrócone pojazdy.");
-            }
-
-            userRepo.deleteById(id);
-            tx.commit();
-        } catch (RuntimeException e) {
-            rollback(tx);
-            throw e;
         }
     }
 
     private void setSession(Session session) {
         userRepo.setSession(session);
         rentalRepo.setSession(session);
-    }
-
-    private void rollback(Transaction tx) {
-        if (tx != null && tx.isActive()) {
-            tx.rollback();
-        }
     }
 }
