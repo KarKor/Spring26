@@ -4,7 +4,9 @@ import com.umcsuser.current.models.VehicleCategoryConfig;
 import com.umcsuser.current.repositories.VehicleCategoryConfigRepository;
 
 import java.util.List;
+import org.springframework.stereotype.Service;
 
+@Service
 public class VehicleCategoryConfigService {
 
     private final VehicleCategoryConfigRepository configRepository;

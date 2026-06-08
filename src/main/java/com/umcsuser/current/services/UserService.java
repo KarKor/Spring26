@@ -5,7 +5,9 @@ import com.umcsuser.current.repositories.RentalRepository;
 import com.umcsuser.current.repositories.UserRepository;
 
 import java.util.List;
+import org.springframework.stereotype.Service;
 
+@Service
 public class UserService implements UserServiceInterface {
     private final UserRepository userRepo;
     private final RentalRepository rentalRepo;

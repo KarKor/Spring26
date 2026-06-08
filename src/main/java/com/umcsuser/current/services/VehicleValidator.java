@@ -4,7 +4,9 @@ import com.umcsuser.current.models.Vehicle;
 import com.umcsuser.current.models.VehicleCategoryConfig;
 
 import java.util.Map;
+import org.springframework.stereotype.Service;
 
+@Service
 public class VehicleValidator {
 
     private final VehicleCategoryConfigService configService;

@@ -7,11 +7,16 @@ import com.umcsuser.current.repositories.UserRepository;
 
 import java.util.List;
 import java.util.Optional;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Profile;
+import org.springframework.stereotype.Repository;
 
+@Repository
+@Profile("json")
 public class UserJsonRepository implements UserRepository {
     private final JsonFileStorage<User> storage;
 
-    public UserJsonRepository(String filename) {
+    public UserJsonRepository(@Value("${data.users.path:users.json") String filename) {
         this.storage = new JsonFileStorage<>(filename, new TypeToken<List<User>>(){}.getType());
     }
 

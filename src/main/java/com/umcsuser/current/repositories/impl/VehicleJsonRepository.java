@@ -4,14 +4,19 @@ import com.google.gson.reflect.TypeToken;
 import com.umcsuser.current.db.JsonFileStorage;
 import com.umcsuser.current.models.Vehicle;
 import com.umcsuser.current.repositories.VehicleRepository;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Profile;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
 
+@Repository
+@Profile("json")
 public class VehicleJsonRepository implements VehicleRepository {
     private final JsonFileStorage<Vehicle> storage;
 
-    public VehicleJsonRepository(String filename) {
+    public VehicleJsonRepository(@Value("${data.vehicles.path:vehicles.json}") String filename) {
         this.storage = new JsonFileStorage<>(filename, new TypeToken<List<Vehicle>>(){}.getType());
     }
 

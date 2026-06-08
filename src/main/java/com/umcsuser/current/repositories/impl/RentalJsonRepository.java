@@ -7,11 +7,16 @@ import com.umcsuser.current.repositories.RentalRepository;
 
 import java.util.List;
 import java.util.Optional;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Profile;
+import org.springframework.stereotype.Repository;
 
+@Repository
+@Profile("json")
 public class RentalJsonRepository implements RentalRepository {
     private final JsonFileStorage<Rental> storage;
 
-    public RentalJsonRepository(String filename) {
+    public RentalJsonRepository(@Value("${data.rentals.path:rentals.json")String filename) {
         this.storage = new JsonFileStorage<>(filename, new TypeToken<List<Rental>>(){}.getType());
     }
 

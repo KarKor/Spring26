@@ -7,7 +7,9 @@ import org.mindrot.jbcrypt.BCrypt;
 
 import java.util.Optional;
 import java.util.UUID;
+import org.springframework.stereotype.Service;
 
+@Service
 public class AuthService implements AuthServiceInterface {
     private final UserRepository userRepository;
 

@@ -1,0 +1,53 @@
+spring:
+  profiles:
+    active: ${APP_PROFILE:json}
+
+---
+# JSON
+spring:
+  config:
+    activate:
+      on-profile: "json"
+
+data:
+  categories:
+    path: "categories.json"
+  vehicles:
+    path: "vehicles.json"
+  users:
+    path: "users.json"
+  rentals:
+    path: "rentals.json"
+
+---
+# JDBC
+spring:
+  config:
+    activate:
+      on-profile: "jdbc"
+
+  datasource:
+    url: ${DB_URL}
+    username: neondb_owner
+    password: npg_6jLwiUDytK4E
+
+---
+# Hibernate
+spring:
+  config:
+    activate:
+      on-profile: "jpa"
+
+  datasource:
+    url: ${DB_URL}
+    username: neondb_owner
+    password: npg_6jLwiUDytK4E
+
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.PostgreSQLDialect
