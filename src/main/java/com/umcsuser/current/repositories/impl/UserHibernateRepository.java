@@ -1,6 +1,7 @@
 package com.umcsuser.current.repositories.impl;
 
 import com.umcsuser.current.models.User;
+import com.umcsuser.current.repositories.UserRepository;
 import org.hibernate.Session;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Repository;
@@ -10,7 +11,7 @@ import java.util.Optional;
 
 @Repository
 @Profile("jpa")
-public class UserHibernateRepository {
+public class UserHibernateRepository implements UserRepository {
 
     private Session session;
 

@@ -1,6 +1,7 @@
 package com.umcsuser.current.repositories.impl;
 
 import com.umcsuser.current.models.Vehicle;
+import com.umcsuser.current.repositories.VehicleRepository;
 import org.hibernate.Session;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Repository;
@@ -11,7 +12,7 @@ import java.util.Optional;
 
 @Repository
 @Profile("jpa")
-public class VehicleHibernateRepository {
+public class VehicleHibernateRepository implements VehicleRepository {
 
     private Session session;
 
