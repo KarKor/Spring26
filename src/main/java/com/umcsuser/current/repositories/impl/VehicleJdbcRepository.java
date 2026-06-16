@@ -113,12 +113,19 @@ public class VehicleJdbcRepository implements VehicleRepository {
 
     @Override
     public void deleteById(String id) {
-        String sql = "DELETE FROM vehicle WHERE id = ?";
         Connection connection = DataSourceUtils.getConnection(dataSource);
+        try {
+            String deleteRentalsSql = "DELETE FROM rental WHERE vehicle_id = ?";
+            try (PreparedStatement stmtRentals = connection.prepareStatement(deleteRentalsSql)) {
+                stmtRentals.setString(1, id);
+                stmtRentals.executeUpdate();
+            }
 
-        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
-            stmt.setString(1, id);
-            stmt.executeUpdate();
+            String deleteVehicleSql = "DELETE FROM vehicle WHERE id = ?";
+            try (PreparedStatement stmtVehicle = connection.prepareStatement(deleteVehicleSql)) {
+                stmtVehicle.setString(1, id);
+                stmtVehicle.executeUpdate();
+            }
         } catch (SQLException e) {
             throw new RuntimeException("Error occurred while deleting vehicle", e);
         } finally {
