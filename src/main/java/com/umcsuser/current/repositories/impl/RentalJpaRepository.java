@@ -2,8 +2,9 @@ package com.umcsuser.current.repositories.impl;
 
 import com.umcsuser.current.models.Rental;
 import com.umcsuser.current.repositories.RentalRepository;
-import org.hibernate.Session;
-import org.hibernate.query.Query;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.TypedQuery;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Repository;
 
@@ -12,41 +13,37 @@ import java.util.Optional;
 
 @Repository
 @Profile("jpa")
-public class RentalHibernateRepository implements RentalRepository {
+public class RentalJpaRepository implements RentalRepository {
 
-    private Session session;
-
-    public void setSession(Session session) {
-        this.session = session;
-    }
+    @PersistenceContext
+    private EntityManager entityManager;
 
     @Override
     public List<Rental> findAll() {
-        return session.createQuery("FROM Rental", Rental.class).list();
+        return entityManager.createQuery("FROM Rental", Rental.class).getResultList();
     }
 
     @Override
     public Optional<Rental> findById(String id) {
-        return Optional.ofNullable(session.get(Rental.class, id));
+        return Optional.ofNullable(entityManager.find(Rental.class, id));
     }
 
     @Override
     public Rental save(Rental rental) {
-        return session.merge(rental);
+        return entityManager.merge(rental);
     }
 
     @Override
     public void deleteById(String id) {
-        Rental rental = session.get(Rental.class, id);
-
+        Rental rental = entityManager.find(Rental.class, id);
         if (rental != null) {
-            session.remove(rental);
+            entityManager.remove(rental);
         }
     }
 
     @Override
     public Optional<Rental> findByVehicleIdAndReturnDateIsNull(String vehicleId) {
-        Query<Rental> query = session.createQuery("""
+        TypedQuery<Rental> query = entityManager.createQuery("""
                 FROM Rental r
                 WHERE r.vehicle.id = :vehicleId
                 AND r.returnDateTime IS NULL
@@ -54,6 +51,6 @@ public class RentalHibernateRepository implements RentalRepository {
 
         query.setParameter("vehicleId", vehicleId);
 
-        return query.uniqueResultOptional();
+        return query.getResultStream().findFirst();
     }
 }
