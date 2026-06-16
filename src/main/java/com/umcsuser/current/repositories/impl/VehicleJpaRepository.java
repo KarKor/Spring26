@@ -35,7 +35,12 @@ public class VehicleJpaRepository implements VehicleRepository {
     @Override
     public void deleteById(String id) {
         Vehicle vehicle = entityManager.find(Vehicle.class, id);
+
         if (vehicle != null) {
+            entityManager.createQuery("DELETE FROM Rental r WHERE r.vehicle.id = :vehicleId")
+                    .setParameter("vehicleId", id)
+                    .executeUpdate();
+
             entityManager.remove(vehicle);
         }
     }
