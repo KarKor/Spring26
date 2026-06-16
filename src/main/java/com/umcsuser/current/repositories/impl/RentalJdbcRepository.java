@@ -31,7 +31,14 @@ public class RentalJdbcRepository implements RentalRepository {
     @Override
     public List<Rental> findAll() {
         List<Rental> list = new ArrayList<>();
-        String sql = "SELECT * FROM rental";
+
+        String sql = """
+            SELECT r.*, v.brand, v.model, v.year, v.plate, u.login, u.role
+            FROM rental r
+            JOIN vehicle v ON r.vehicle_id = v.id
+            JOIN users u ON r.user_id = u.id
+            """;
+
         Connection connection = DataSourceUtils.getConnection(dataSource);
 
         try (PreparedStatement stmt = connection.prepareStatement(sql);
@@ -46,6 +53,25 @@ public class RentalJdbcRepository implements RentalRepository {
             DataSourceUtils.releaseConnection(connection, dataSource);
         }
         return list;
+    }
+
+    private Rental mapRow(ResultSet rs) throws SQLException {
+        return Rental.builder()
+                .id(rs.getString("id"))
+                .rentDateTime(rs.getString("rent_date"))
+                .returnDateTime(rs.getString("return_date"))
+                .vehicle(Vehicle.builder()
+                        .id(rs.getString("vehicle_id"))
+                        .brand(rs.getString("brand"))
+                        .model(rs.getString("model"))
+                        .year(rs.getInt("year"))
+                        .plate(rs.getString("plate"))
+                        .build())
+                .user(User.builder()
+                        .id(rs.getString("user_id"))
+                        .login(rs.getString("login"))
+                        .build())
+                .build();
     }
 
     @Override
@@ -144,13 +170,5 @@ public class RentalJdbcRepository implements RentalRepository {
         return Optional.empty();
     }
 
-    private Rental mapRow(ResultSet rs) throws SQLException {
-        return Rental.builder()
-                .id(rs.getString("id"))
-                .vehicle(Vehicle.builder().id(rs.getString("vehicle_id")).build())
-                .user(User.builder().id(rs.getString("user_id")).build())
-                .rentDateTime(rs.getString("rent_date"))
-                .returnDateTime(rs.getString("return_date"))
-                .build();
-    }
+
 }
