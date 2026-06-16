@@ -88,9 +88,9 @@ public class RentalJdbcRepository implements RentalRepository {
 
             String sql;
             if (exists) {
-                sql = "UPDATE rental SET vehicle = ?, user_id = ?, rent_date = ?, return_date = ? WHERE id = ?";
+                sql = "UPDATE rental SET vehicle_id = ?, user_id = ?, rent_date = ?, return_date = ? WHERE id = ?";
             } else {
-                sql = "INSERT INTO rental (vehicle, user_id, rent_date, return_date, id) VALUES (?, ?, ?, ?, ?)";
+                sql = "INSERT INTO rental (vehicle_id, user_id, rent_date, return_date, id) VALUES (?, ?, ?, ?, ?)";
             }
 
             try (PreparedStatement stmt = connection.prepareStatement(sql)) {
@@ -126,7 +126,7 @@ public class RentalJdbcRepository implements RentalRepository {
 
     @Override
     public Optional<Rental> findByVehicleIdAndReturnDateIsNull(String vehicleId) {
-        String sql = "SELECT * FROM rental WHERE vehicle = ? AND return_date IS NULL";
+        String sql = "SELECT * FROM rental WHERE vehicle_id = ? AND return_date IS NULL";
         Connection connection = DataSourceUtils.getConnection(dataSource);
 
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {

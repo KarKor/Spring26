@@ -3,6 +3,7 @@ package com.umcsuser.current.controllers;
 import com.umcsuser.current.models.User;
 import com.umcsuser.current.services.UserServiceInterface;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
