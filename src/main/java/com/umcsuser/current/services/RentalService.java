@@ -13,8 +13,10 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@Transactional
 public class RentalService implements RentalServiceInterface {
     private final RentalRepository rentalRepo;
     private final VehicleRepository vehicleRepo;
